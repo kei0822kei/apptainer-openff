@@ -54,6 +54,10 @@ From: nvidia/cuda:12.2.2-devel-ubuntu22.04
     export OPENMM_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
     export OMPI_ALLOW_RUN_AS_ROOT=1
 
+%runscript
+    # Run installation test by default when calling 'apptainer run'
+    python -m openmm.testInstallation "$@"
+
 %labels
     Author Assistant
     Description OpenMM + OpenFF + AmberTools environment optimized for GPU simulation
