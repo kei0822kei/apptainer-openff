@@ -17,12 +17,12 @@ This repository provides a production-ready, GPU-accelerated environment for mol
 
 ## Getting Started
 
-### 1. Build the Container
+### 1. Donwload Container
 
-Build the SIF image from the definition file:
+Donwload Container:
 
 ```bash
-apptainer build openff-cu12.sif openff-cu12.def
+apptainer pull oras://ghcr.io/kei0822kei/apptainer-openff/openff-cu12:v0.1
 ```
 
 ### 2. Test
