@@ -1,0 +1,57 @@
+# --- Apptainer/Singularity ---
+# SIF images are large binaries, should not be tracked
+*.sif
+*.simg
+
+# --- Python ---
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- Molecular Dynamics / Data ---
+# Simulation trajectories and outputs
+*.dcd
+*.pdb
+*.xtc
+*.trr
+*.log
+*.nc
+*.h5
+
+# --- Environment ---
+# Don't commit local virtual environments or mamba roots
+.venv/
+venv/
+env/
+.mamba/
+
+# --- System / IDE ---
+# macOS
+.DS_Store
+# VS Code
+.vscode/
+# JetBrains
+.idea/
+
+# --- Temporary / Miscellaneous ---
+.tmp/
+tmp/
+*.bak

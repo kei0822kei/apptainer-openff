@@ -1,0 +1,63 @@
+Bootstrap: docker
+From: nvidia/cuda:12.2.2-devel-ubuntu22.04
+
+%post
+    # --- Configuration ---
+    export DEBIAN_FRONTEND=noninteractive
+    export MAMBA_ROOT_PREFIX=/opt/micromamba
+    export ENV_PATH=${MAMBA_ROOT_PREFIX}/envs/openff
+    export PATH=${ENV_PATH}/bin:${PATH}
+
+    # --- System dependencies ---
+    apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates curl git bash bzip2 libgomp1 \
+        && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+    # --- Micromamba installation ---
+    mkdir -p ${MAMBA_ROOT_PREFIX}
+    curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest \
+        | tar -xvj -C /usr/local/bin/ --strip-components=1 bin/micromamba
+
+    # --- Environment setup (Conda-forge only for commercial compliance) ---
+    micromamba config append channels conda-forge
+    micromamba config remove channels defaults || true
+    micromamba config set channel_priority strict
+
+    # --- Package installation ---
+    micromamba create -y -p ${ENV_PATH} \
+        python=3.12 \
+        openmm \
+        cuda-version=12.2 \
+        ambertools \
+        openff-toolkit \
+        openff-interchange \
+        numpy \
+        scipy \
+        mpi4py
+
+    micromamba clean -afy
+
+%environment
+    # --- Paths ---
+    export MAMBA_ROOT_PREFIX=/opt/micromamba
+    export ENV_PATH=${MAMBA_ROOT_PREFIX}/envs/openff
+    export PATH=${ENV_PATH}/bin:/usr/local/cuda/bin:${PATH}
+
+    # --- Libraries ---
+    # Priority: Container-internal CUDA > OpenMM libs > Host NVIDIA drivers (via --nv)
+    export LD_LIBRARY_PATH=/usr/local/cuda/lib64:${ENV_PATH}/lib:/usr/local/nvidia/lib64:/usr/local/nvidia/lib:${LD_LIBRARY_PATH}
+    export OPENMM_PLUGIN_DIR=${ENV_PATH}/lib/plugins
+
+    # --- Performance & Configuration ---
+    export OMP_NUM_THREADS=4
+    export MKL_NUM_THREADS=4
+    export OPENMM_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
+    export OMPI_ALLOW_RUN_AS_ROOT=1
+
+%runscript
+    # Run installation test by default when calling 'apptainer run'
+    python -m openmm.testInstallation "$@"
+
+%labels
+    Author Assistant
+    Description OpenMM + OpenFF + AmberTools environment optimized for GPU simulation
