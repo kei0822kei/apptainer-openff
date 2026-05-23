@@ -1,0 +1,42 @@
+name: Build and Push SIF
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger workflow only when a version tag (e.g., v0.1) is pushed
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # Required for pushing to GHCR
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Apptainer
+        uses: apptainer/setup-apptainer@v1
+
+      - name: Build SIF image
+        run: apptainer build openff-cu12.sif openff-cu12.def
+
+      - name: Test container
+        # Execute the container to verify the environment. 
+        # The workflow will stop here if the test returns a non-zero exit code.
+        run: apptainer run --nv openff-cu12.sif
+
+      - name: Push to GitHub Container Registry (GHCR)
+        run: |
+          # Log in to GHCR using the automatically generated GITHUB_TOKEN
+          echo "${{ secrets.GITHUB_TOKEN }}" | apptainer remote login -u ${{ github.actor }} --password-stdin oras://ghcr.io
+
+          # Extract the tag name from the GitHub reference (e.g., v0.1)
+          TAG=${GITHUB_REF#refs/tags/}
+
+          # Push the SIF image with the specific version tag
+          apptainer push openff-cu12.sif oras://ghcr.io/${{ github.repository }}/openff-cu12:$TAG
+
+          # Push the SIF image with the 'latest' tag
+          apptainer push openff-cu12.sif oras://ghcr.io/${{ github.repository }}/openff-cu12:latest

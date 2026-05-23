@@ -22,7 +22,7 @@ This repository provides a production-ready, GPU-accelerated environment for mol
 Donwload Container:
 
 ```bash
-apptainer pull oras://ghcr.io/kei0822kei/apptainer-openff/openff-cu12:v0.1
+apptainer pull oras://ghcr.io/kei0822kei/apptainer-openff/openff-cu12:latest
 ```
 
 ### 2. Test
