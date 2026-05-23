@@ -15,9 +15,13 @@ This repository provides a production-ready, GPU-accelerated environment for mol
 - **NVIDIA GPU** with appropriate drivers installed.
 - **NVIDIA Container Toolkit** (for `--nv` flag support).
 
+## License
+
+MIT.
+
 ## Getting Started
 
-### 1. Donwload Container
+### 1. Download Container
 
 Donwload Container:
 
