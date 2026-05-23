@@ -3,43 +3,55 @@ name: Build and Push SIF
 on:
   push:
     tags:
-      - 'v*' # Trigger workflow only when a version tag (e.g., v0.1) is pushed
+      - 'v*'
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
+  build-and-push:
+    runs-on: ubuntu-24.04
+
     permissions:
       contents: read
-      packages: write # Required for pushing to GHCR
+      packages: write
+
+    env:
+      IMAGE_NAME: openff-cu12
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install Apptainer
-        # Using apt to install Apptainer directly from the Ubuntu repository
         run: |
           sudo apt-get update
           sudo apt-get install -y apptainer
 
+      - name: Verify installation
+        run: apptainer --version
+
       - name: Build SIF image
-        run: apptainer build openff-cu12.sif openff-cu12.def
+        run: |
+          apptainer build ${IMAGE_NAME}.sif openff-cu12.def
 
       - name: Test container
-        # Execute the container to verify the environment. 
-        # The workflow will stop here if the test returns a non-zero exit code.
-        run: apptainer run --nv openff-cu12.sif
-
-      - name: Push to GitHub Container Registry (GHCR)
         run: |
-          # Log in to GHCR using the automatically generated GITHUB_TOKEN
-          echo "${{ secrets.GITHUB_TOKEN }}" | apptainer remote login -u ${{ github.actor }} --password-stdin oras://ghcr.io
+          apptainer run --nv ${IMAGE_NAME}.sif
 
-          # Extract the tag name from the GitHub reference (e.g., v0.1)
+      - name: Login to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" \
+            | apptainer remote login \
+                -u "${{ github.actor }}" \
+                --password-stdin \
+                oras://ghcr.io
+
+      - name: Push image
+        run: |
           TAG=${GITHUB_REF#refs/tags/}
 
-          # Push the SIF image with the specific version tag
-          apptainer push openff-cu12.sif oras://ghcr.io/${{ github.repository }}/openff-cu12:$TAG
+          apptainer push \
+            ${IMAGE_NAME}.sif \
+            oras://ghcr.io/${{ github.repository }}/${IMAGE_NAME}:${TAG}
 
-          # Push the SIF image with the 'latest' tag
-          apptainer push openff-cu12.sif oras://ghcr.io/${{ github.repository }}/openff-cu12:latest
+          apptainer push \
+            ${IMAGE_NAME}.sif \
+            oras://ghcr.io/${{ github.repository }}/${IMAGE_NAME}:latest
