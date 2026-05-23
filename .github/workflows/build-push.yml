@@ -17,7 +17,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Apptainer
-        uses: apptainer/setup-apptainer@v1
+        # Using apt to install Apptainer directly from the Ubuntu repository
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y apptainer
 
       - name: Build SIF image
         run: apptainer build openff-cu12.sif openff-cu12.def
