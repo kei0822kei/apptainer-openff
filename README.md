@@ -41,5 +41,6 @@ apptainer run --nv openff-cu12.sif
 
 ```bash
 cd examples
-apptainer exec --nv ../openff-cu12.sif python basic_openff.py
+apptainer exec ../openff-cu12.sif python prepare_params.py
+apptainer exec --nv ../openff-cu12.sif python run_simulation.py
 ```
